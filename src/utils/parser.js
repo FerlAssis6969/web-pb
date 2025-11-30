@@ -28,7 +28,16 @@ export function parseRecord(line) {
         if (separatorIndex !== -1) {
             const key = part.substring(0, separatorIndex).trim();
             const value = part.substring(separatorIndex + 1).trim();
-            data[key] = value;
+
+            // Normalize keys
+            let normalizedKey = key;
+            if (key.toLowerCase() === 'points') normalizedKey = 'Points';
+            if (key.toLowerCase() === 'geburtstag') normalizedKey = 'DOB';
+            if (key.toLowerCase() === 'locked') normalizedKey = 'Locked';
+            if (key.toLowerCase() === 'card') normalizedKey = 'Card';
+            if (key.toLowerCase() === 'name') normalizedKey = 'Name';
+
+            data[normalizedKey] = value;
         } else {
             // Key only or malformed
             data[`Field_${i}`] = part;
