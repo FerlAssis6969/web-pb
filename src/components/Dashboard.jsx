@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, RefreshCw, LogOut, CheckCircle, List, Trash2 } from 'lucide-react';
+import { Plus, RefreshCw, LogOut, CheckCircle, List, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import RecordCard from './RecordCard';
 import { parseRecord } from '../utils/parser';
 
@@ -10,6 +10,7 @@ const Dashboard = ({ user, onLogout }) => {
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('active'); // 'active' | 'checked'
     const [minPoints, setMinPoints] = useState('');
+    const [sortOrder, setSortOrder] = useState('desc'); // 'desc' | 'asc'
 
     const fetchRecords = async () => {
         setLoading(true);
@@ -113,11 +114,17 @@ const Dashboard = ({ user, onLogout }) => {
         }
     };
 
-    const filteredRecords = records.filter(record => {
-        if (!minPoints) return true;
-        const points = parseInt(record.parsedData.Points) || 0;
-        return points >= parseInt(minPoints);
-    });
+    const filteredRecords = records
+        .filter(record => {
+            if (!minPoints) return true;
+            const points = parseInt(record.parsedData.Points) || 0;
+            return points >= parseInt(minPoints);
+        })
+        .sort((a, b) => {
+            const pointsA = parseInt(a.parsedData.Points) || 0;
+            const pointsB = parseInt(b.parsedData.Points) || 0;
+            return sortOrder === 'desc' ? pointsB - pointsA : pointsA - pointsB;
+        });
 
     return (
         <div className="min-h-screen p-4 md:p-8 pt-20">
@@ -139,6 +146,13 @@ const Dashboard = ({ user, onLogout }) => {
                                 className="glass-input px-3 py-2 rounded-lg text-sm w-32"
                             />
                         </div>
+                        <button
+                            onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+                            className="p-2 rounded-lg glass-button text-gray-400 hover:text-white flex items-center gap-2"
+                            title={`Sort by Points (${sortOrder === 'desc' ? 'High to Low' : 'Low to High'})`}
+                        >
+                            {sortOrder === 'desc' ? <ArrowDown size={20} /> : <ArrowUp size={20} />}
+                        </button>
                         <button
                             onClick={fetchRecords}
                             className="p-2 rounded-lg glass-button text-gray-400 hover:text-white"
