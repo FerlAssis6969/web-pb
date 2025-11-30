@@ -13,26 +13,36 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        const { rawLine, parsedData } = JSON.parse(event.body);
+        const body = JSON.parse(event.body);
+        const db = await readDB();
+        const newRecords = [];
 
-        if (!rawLine || !parsedData) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'Missing data' }) };
+        // Normalize input to array
+        const items = Array.isArray(body) ? body : [body];
+
+        for (const item of items) {
+            const { rawLine, parsedData } = item;
+            if (!rawLine || !parsedData) continue;
+
+            const newRecord = {
+                id: uuidv4(),
+                rawLine,
+                parsedData,
+                createdAt: new Date().toISOString()
+            };
+            newRecords.push(newRecord);
+            db.records.push(newRecord);
         }
 
-        const db = await readDB();
-        const newRecord = {
-            id: uuidv4(),
-            rawLine,
-            parsedData,
-            createdAt: new Date().toISOString()
-        };
+        if (newRecords.length === 0) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'No valid data found' }) };
+        }
 
-        db.records.push(newRecord);
         await writeDB(db);
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ success: true, record: newRecord })
+            body: JSON.stringify({ success: true, count: newRecords.length, records: newRecords })
         };
     } catch (error) {
         return { statusCode: 500, body: JSON.stringify({ error: error.message }) };

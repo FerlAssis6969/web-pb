@@ -9,6 +9,7 @@ const Dashboard = ({ user, onLogout }) => {
     const [inputLine, setInputLine] = useState('');
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('active'); // 'active' | 'checked'
+    const [minPoints, setMinPoints] = useState('');
 
     const fetchRecords = async () => {
         setLoading(true);
@@ -36,16 +37,25 @@ const Dashboard = ({ user, onLogout }) => {
         e.preventDefault();
         if (!inputLine.trim()) return;
 
-        const parsed = parseRecord(inputLine);
-        if (!parsed) {
-            alert("Could not parse line format.");
+        const lines = inputLine.split('\n').filter(l => l.trim());
+        const payload = [];
+
+        for (const line of lines) {
+            const parsed = parseRecord(line);
+            if (parsed) {
+                payload.push({ rawLine: line, parsedData: parsed });
+            }
+        }
+
+        if (payload.length === 0) {
+            alert("Could not parse any lines.");
             return;
         }
 
         try {
             const res = await fetch('/.netlify/functions/addRecord', {
                 method: 'POST',
-                body: JSON.stringify({ rawLine: inputLine, parsedData: parsed }),
+                body: JSON.stringify(payload),
             });
 
             if (res.ok) {
@@ -103,6 +113,12 @@ const Dashboard = ({ user, onLogout }) => {
         }
     };
 
+    const filteredRecords = records.filter(record => {
+        if (!minPoints) return true;
+        const points = parseInt(record.parsedData.Points) || 0;
+        return points >= parseInt(minPoints);
+    });
+
     return (
         <div className="min-h-screen p-4 md:p-8 pt-20">
             <div className="max-w-6xl mx-auto space-y-8">
@@ -114,6 +130,15 @@ const Dashboard = ({ user, onLogout }) => {
                         <p className="text-gray-400 text-sm">Logged in as <span className="text-blue-400">{user.username}</span></p>
                     </div>
                     <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <input
+                                type="number"
+                                placeholder="Min Points"
+                                value={minPoints}
+                                onChange={(e) => setMinPoints(e.target.value)}
+                                className="glass-input px-3 py-2 rounded-lg text-sm w-32"
+                            />
+                        </div>
                         <button
                             onClick={fetchRecords}
                             className="p-2 rounded-lg glass-button text-gray-400 hover:text-white"
@@ -132,18 +157,18 @@ const Dashboard = ({ user, onLogout }) => {
 
                 {/* Input Section */}
                 <div className="glass-panel p-6 rounded-2xl">
-                    <form onSubmit={handleAdd} className="flex gap-4">
-                        <input
-                            type="text"
+                    <form onSubmit={handleAdd} className="flex gap-4 items-start">
+                        <textarea
                             value={inputLine}
                             onChange={(e) => setInputLine(e.target.value)}
-                            placeholder="Paste record line here (email:pass | Points = ...)"
-                            className="glass-input flex-1 px-4 py-3 rounded-xl font-mono text-sm"
+                            placeholder="Paste record lines here (one per line)"
+                            className="glass-input flex-1 px-4 py-3 rounded-xl font-mono text-sm min-h-[50px] resize-y"
+                            rows={1}
                         />
                         <button
                             type="submit"
                             disabled={!inputLine.trim()}
-                            className="glass-button px-6 py-3 rounded-xl text-white font-medium flex items-center gap-2 disabled:opacity-50"
+                            className="glass-button px-6 py-3 rounded-xl text-white font-medium flex items-center gap-2 disabled:opacity-50 h-[50px]"
                         >
                             <Plus size={20} /> Add
                         </button>
@@ -157,7 +182,7 @@ const Dashboard = ({ user, onLogout }) => {
                             onClick={() => setActiveTab('active')}
                             className={`pb-3 px-2 text-sm font-medium transition-colors flex items-center gap-2 ${activeTab === 'active' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-500 hover:text-gray-300'}`}
                         >
-                            <List size={16} /> Active ({records.length})
+                            <List size={16} /> Active ({filteredRecords.length})
                         </button>
                         <button
                             onClick={() => setActiveTab('checked')}
@@ -179,8 +204,8 @@ const Dashboard = ({ user, onLogout }) => {
                 {/* List */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {activeTab === 'active' ? (
-                        records.length > 0 ? (
-                            records.map(record => (
+                        filteredRecords.length > 0 ? (
+                            filteredRecords.map(record => (
                                 <RecordCard key={record.id} record={record} onCheck={handleCheck} onDelete={handleDelete} isChecked={false} />
                             ))
                         ) : (
