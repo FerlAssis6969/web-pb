@@ -26,14 +26,16 @@ function App() {
 
     const checkSession = async () => {
         try {
-            const res = await fetch('/.netlify/functions/getRecords'); // We will need a better check later
+            const res = await fetch('/.netlify/functions/me');
             if (res.ok) {
-                // For now, assume admin if username is admin. 
-                // We will update this when we have a real /me endpoint.
-                setUser({ username: 'admin', role: 'admin' });
+                const data = await res.json();
+                setUser(data.user);
+            } else {
+                setUser(null);
             }
         } catch (error) {
             console.error("Session check failed", error);
+            setUser(null);
         } finally {
             setLoading(false);
         }

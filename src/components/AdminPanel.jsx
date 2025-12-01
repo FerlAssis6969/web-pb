@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { LogOut, Activity, Users, Database, RefreshCw, Plus, Trash2 } from 'lucide-react';
+import { LogOut, Activity, Users, Database, RefreshCw, Plus, Trash2, ArrowLeft } from 'lucide-react';
 
 const AdminPanel = ({ user, onLogout }) => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -158,12 +158,20 @@ const AdminPanel = ({ user, onLogout }) => {
                         <h1 className="text-2xl font-bold">Admin Panel</h1>
                         <p className="text-gray-400 text-sm">Logged in as <span className="text-blue-400">{user.username}</span></p>
                     </div>
-                    <button
-                        onClick={onLogout}
-                        className="px-4 py-2 rounded-lg glass-button text-red-400 hover:bg-red-500/10 flex items-center gap-2"
-                    >
-                        <LogOut size={18} /> Logout
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => window.history.back()}
+                            className="px-4 py-2 rounded-lg glass-button text-gray-400 hover:text-white flex items-center gap-2"
+                        >
+                            <ArrowLeft size={18} /> Back
+                        </button>
+                        <button
+                            onClick={onLogout}
+                            className="px-4 py-2 rounded-lg glass-button text-red-400 hover:bg-red-500/10 flex items-center gap-2"
+                        >
+                            <LogOut size={18} /> Logout
+                        </button>
+                    </div>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
