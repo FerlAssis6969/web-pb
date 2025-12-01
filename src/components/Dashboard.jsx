@@ -260,7 +260,7 @@ const Dashboard = ({ user, onLogout }) => {
                             <CheckCircle size={16} /> Checked ({checkedRecords.length})
                         </button>
                     </div>
-                    )}
+
                     <div className="flex items-center gap-2 ml-auto">
                         {user.role === 'admin' && (
                             <button
