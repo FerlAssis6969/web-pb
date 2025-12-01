@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Plus, RefreshCw, LogOut, CheckCircle, List, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Plus, RefreshCw, LogOut, CheckCircle, List, Trash2, ArrowUp, ArrowDown, Shield } from 'lucide-react';
 import RecordCard from './RecordCard';
 import { parseRecord } from '../utils/parser';
 
 const Dashboard = ({ user, onLogout }) => {
     const [searchParams, setSearchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     // State from URL or defaults
     const activeTab = searchParams.get('tab') || 'active'; // 'active' | 'checked'
@@ -213,6 +214,14 @@ const Dashboard = ({ user, onLogout }) => {
                         >
                             <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
                         </button>
+                        {user.role === 'admin' && (
+                            <button
+                                onClick={() => navigate('/admin')}
+                                className="px-4 py-2 rounded-lg glass-button text-blue-400 hover:bg-blue-500/10 flex items-center gap-2"
+                            >
+                                <Shield size={18} /> Admin
+                            </button>
+                        )}
                         <button
                             onClick={onLogout}
                             className="px-4 py-2 rounded-lg glass-button text-red-400 hover:bg-red-500/10 flex items-center gap-2"
