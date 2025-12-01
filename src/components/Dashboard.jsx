@@ -214,14 +214,7 @@ const Dashboard = ({ user, onLogout }) => {
                         >
                             <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
                         </button>
-                        {user.role === 'admin' && (
-                            <button
-                                onClick={() => navigate('/admin')}
-                                className="px-4 py-2 rounded-lg glass-button text-blue-400 hover:bg-blue-500/10 flex items-center gap-2"
-                            >
-                                <Shield size={18} /> Admin
-                            </button>
-                        )}
+
                         <button
                             onClick={onLogout}
                             className="px-4 py-2 rounded-lg glass-button text-red-400 hover:bg-red-500/10 flex items-center gap-2"
@@ -267,14 +260,17 @@ const Dashboard = ({ user, onLogout }) => {
                             <CheckCircle size={16} /> Checked ({checkedRecords.length})
                         </button>
                     </div>
-                    {activeTab === 'checked' && checkedRecords.length > 0 && (
-                        <button
-                            onClick={handleClearChecked}
-                            className="mb-2 text-xs text-red-400 hover:text-red-300 flex items-center gap-1 px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
-                        >
-                            <Trash2 size={14} /> Delete All Checked
-                        </button>
                     )}
+                    <div className="flex items-center gap-2 ml-auto">
+                        {user.role === 'admin' && (
+                            <button
+                                onClick={() => navigate('/admin')}
+                                className="mb-2 px-3 py-1 rounded-lg glass-button text-blue-400 hover:bg-blue-500/10 flex items-center gap-2 text-sm"
+                            >
+                                <Shield size={16} /> Admin
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 {/* List */}
