@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { Upload, CheckCircle, AlertCircle, FileJson } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Upload, CheckCircle, AlertCircle, FileJson, ArrowLeft, Database, Users, Activity } from 'lucide-react';
 
 export default function BlobUploader() {
+    const navigate = useNavigate();
     const [files, setFiles] = useState({
         records: null,
         users: null,
@@ -108,159 +110,153 @@ export default function BlobUploader() {
         {
             name: 'records',
             key: 'data',
-            label: 'Records (Datensätze)',
-            description: 'Hauptdaten mit allen Records',
-            hint: '.netlify/blobs/deploy/records/data.json'
+            label: 'Records',
+            description: 'Main database records',
+            icon: Database,
+            color: 'text-blue-400',
+            hint: 'records/data.json'
         },
         {
             name: 'users',
             key: 'all_users',
-            label: 'Users (Benutzer)',
-            description: 'Alle Benutzer und deren Daten',
-            hint: '.netlify/blobs/deploy/users/all_users.json'
+            label: 'Users',
+            description: 'User accounts and roles',
+            icon: Users,
+            color: 'text-purple-400',
+            hint: 'users/all_users.json'
         },
         {
             name: 'stats',
             key: 'recent_logs',
-            label: 'Stats (Statistiken)',
-            description: 'Aktivitätslogs und Statistiken',
-            hint: '.netlify/blobs/deploy/stats/recent_logs.json'
+            label: 'Statistics',
+            description: 'Activity logs and metrics',
+            icon: Activity,
+            color: 'text-green-400',
+            hint: 'stats/recent_logs.json'
         }
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
-            <div className="max-w-4xl mx-auto">
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-8 shadow-2xl">
-                    <div className="flex items-center gap-3 mb-6">
-                        <FileJson className="w-8 h-8 text-blue-400" />
-                        <h1 className="text-2xl font-bold text-white">Blob-Daten hochladen</h1>
+        <div className="min-h-screen p-4 md:p-8 pt-20 text-white">
+            <div className="max-w-5xl mx-auto space-y-8">
+
+                {/* Header */}
+                <header className="flex justify-between items-center glass-panel p-6 rounded-2xl">
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-blue-500/10 rounded-xl">
+                            <Upload className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold">Data Management</h1>
+                            <p className="text-gray-400 text-sm">Upload and restore system data</p>
+                        </div>
                     </div>
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        className="px-4 py-2 rounded-lg glass-button text-gray-400 hover:text-white flex items-center gap-2"
+                    >
+                        <ArrowLeft size={18} /> Back to Dashboard
+                    </button>
+                </header>
 
-                    <p className="text-slate-300 mb-6">
-                        Laden Sie Ihre lokalen Blob-Daten wieder auf Netlify hoch. Sie können mehrere Stores gleichzeitig hochladen.
-                    </p>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Upload Cards */}
+                    {storeConfigs.map(config => {
+                        const Icon = config.icon;
+                        const file = files[config.name];
+                        const result = results.find(r => r.storeName === config.name);
 
-                    {/* File Inputs for each store */}
-                    <div className="space-y-4 mb-6">
-                        {storeConfigs.map(config => (
-                            <div key={config.name} className="bg-slate-700/30 border border-slate-600/50 rounded-lg p-4">
-                                <div className="mb-2">
-                                    <h3 className="text-sm font-semibold text-white">{config.label}</h3>
-                                    <p className="text-xs text-slate-400">{config.description}</p>
-                                    <p className="text-xs text-slate-500 font-mono mt-1">{config.hint}</p>
+                        return (
+                            <div key={config.name} className="glass-panel p-6 rounded-2xl flex flex-col relative overflow-hidden group">
+                                <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity ${config.color}`}>
+                                    <Icon size={100} />
                                 </div>
-                                <input
-                                    type="file"
-                                    accept=".json"
-                                    onChange={(e) => handleFileChange(config.name, e)}
-                                    className="block w-full text-sm text-slate-400
-                                        file:mr-4 file:py-2 file:px-4
-                                        file:rounded-lg file:border-0
-                                        file:text-sm file:font-semibold
-                                        file:bg-blue-500 file:text-white
-                                        hover:file:bg-blue-600
-                                        file:cursor-pointer cursor-pointer
-                                        border border-slate-600 rounded-lg
-                                        bg-slate-700/50"
-                                />
-                                {files[config.name] && (
-                                    <p className="mt-2 text-sm text-green-400 flex items-center gap-2">
-                                        <CheckCircle className="w-4 h-4" />
-                                        {files[config.name].name} ({(files[config.name].size / 1024).toFixed(2)} KB)
-                                    </p>
-                                )}
+
+                                <div className="flex items-center gap-3 mb-4 relative z-10">
+                                    <Icon className={`w-5 h-5 ${config.color}`} />
+                                    <h3 className="font-bold text-lg">{config.label}</h3>
+                                </div>
+
+                                <p className="text-sm text-gray-400 mb-6 relative z-10 min-h-[40px]">
+                                    {config.description}
+                                </p>
+
+                                <div className="mt-auto relative z-10 space-y-3">
+                                    <label className="block w-full cursor-pointer group/input">
+                                        <input
+                                            type="file"
+                                            accept=".json"
+                                            onChange={(e) => handleFileChange(config.name, e)}
+                                            className="hidden"
+                                        />
+                                        <div className={`
+                                            w-full p-3 rounded-xl border border-dashed transition-all
+                                            flex items-center justify-center gap-2 text-sm font-medium
+                                            ${file
+                                                ? 'border-green-500/50 bg-green-500/10 text-green-400'
+                                                : 'border-white/10 bg-black/20 text-gray-400 group-hover/input:border-white/20 group-hover/input:text-white'
+                                            }
+                                        `}>
+                                            {file ? (
+                                                <>
+                                                    <CheckCircle size={16} />
+                                                    <span className="truncate max-w-[150px]">{file.name}</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <FileJson size={16} />
+                                                    <span>Select JSON</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    </label>
+
+                                    {result && (
+                                        <div className={`text-xs p-2 rounded-lg flex items-center gap-2 ${result.success ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+                                            }`}>
+                                            {result.success ? <CheckCircle size={12} /> : <AlertCircle size={12} />}
+                                            <span>{result.success ? 'Upload Successful' : 'Failed'}</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        ))}
+                        );
+                    })}
+                </div>
+
+                {/* Action Bar */}
+                <div className="glass-panel p-6 rounded-2xl flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div className="flex items-center gap-3 text-sm text-gray-400">
+                        <AlertCircle size={16} className="text-yellow-500" />
+                        <p>Warning: Uploading will overwrite existing data in the selected stores.</p>
                     </div>
 
-                    {/* Upload Button */}
                     <button
                         onClick={handleUploadAll}
                         disabled={Object.values(files).every(f => f === null) || uploading}
-                        className="w-full flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 
-                            disabled:bg-slate-600 disabled:cursor-not-allowed
-                            text-white font-semibold py-3 px-6 rounded-lg 
-                            transition-all duration-200 transform hover:scale-[1.02]
-                            disabled:transform-none shadow-lg"
+                        className="glass-button px-8 py-3 rounded-xl text-white font-bold flex items-center gap-2 disabled:opacity-50 bg-blue-500/20 hover:bg-blue-500/30 border-blue-500/50"
                     >
                         {uploading ? (
                             <>
                                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                                Wird hochgeladen...
+                                Processing...
                             </>
                         ) : (
                             <>
-                                <Upload className="w-5 h-5" />
-                                Alle ausgewählten Daten hochladen
+                                <Upload size={20} />
+                                Upload Selected
                             </>
                         )}
                     </button>
-
-                    {/* Results */}
-                    {results.length > 0 && (
-                        <div className="mt-6 space-y-3">
-                            {results.map((result, idx) => (
-                                <div
-                                    key={idx}
-                                    className={`p-4 rounded-lg border ${result.success
-                                            ? 'bg-green-500/10 border-green-500/50'
-                                            : 'bg-red-500/10 border-red-500/50'
-                                        }`}
-                                >
-                                    <div className="flex items-start gap-3">
-                                        {result.success ? (
-                                            <CheckCircle className="w-5 h-5 text-green-400 mt-0.5 flex-shrink-0" />
-                                        ) : (
-                                            <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-                                        )}
-                                        <div className="flex-1">
-                                            <h3 className={`font-semibold mb-1 ${result.success ? 'text-green-400' : 'text-red-400'
-                                                }`}>
-                                                {result.storeName}/{result.key}
-                                            </h3>
-                                            {result.success ? (
-                                                <>
-                                                    <p className="text-sm text-green-300 mb-1">{result.message}</p>
-                                                    <div className="text-xs text-green-400/80 space-y-1">
-                                                        <p>• Größe: {(result.dataSize / 1024).toFixed(2)} KB</p>
-                                                        <p>• Zeitstempel: {new Date(result.timestamp).toLocaleString('de-DE')}</p>
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <p className="text-sm text-red-300">{result.error}</p>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Error Message */}
-                    {error && (
-                        <div className="mt-6 p-4 bg-red-500/10 border border-red-500/50 rounded-lg">
-                            <div className="flex items-start gap-3">
-                                <AlertCircle className="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0" />
-                                <div className="flex-1">
-                                    <h3 className="font-semibold text-red-400 mb-1">Fehler</h3>
-                                    <p className="text-sm text-red-300">{error}</p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Instructions */}
-                    <div className="mt-8 p-4 bg-slate-700/30 border border-slate-600/50 rounded-lg">
-                        <h3 className="font-semibold text-slate-300 mb-2">Anleitung:</h3>
-                        <ol className="text-sm text-slate-400 space-y-1 list-decimal list-inside">
-                            <li>Wählen Sie die lokalen JSON-Dateien aus (eine oder mehrere)</li>
-                            <li>Klicken Sie auf "Alle ausgewählten Daten hochladen"</li>
-                            <li>Die Daten werden zu den entsprechenden Netlify Blobs hochgeladen</li>
-                            <li>Nach erfolgreicher Upload können Sie die Seite neu laden</li>
-                        </ol>
-                    </div>
                 </div>
+
+                {/* Error Display */}
+                {error && (
+                    <div className="p-4 bg-red-500/10 border border-red-500/50 rounded-xl flex items-center gap-3 text-red-400">
+                        <AlertCircle size={20} />
+                        <p>{error}</p>
+                    </div>
+                )}
             </div>
         </div>
     );
