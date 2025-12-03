@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { LogOut, Activity, Users, Database, RefreshCw, Plus, Trash2, ArrowLeft, Upload } from 'lucide-react';
 
 const AdminPanel = ({ user, onLogout }) => {
+    const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || 'stats'; // 'stats' | 'users' | 'data'
 
@@ -160,7 +161,7 @@ const AdminPanel = ({ user, onLogout }) => {
                     </div>
                     <div className="flex items-center gap-3">
                         <button
-                            onClick={() => window.history.back()}
+                            onClick={() => navigate('/dashboard')}
                             className="px-4 py-2 rounded-lg glass-button text-gray-400 hover:text-white flex items-center gap-2"
                         >
                             <ArrowLeft size={18} /> Back

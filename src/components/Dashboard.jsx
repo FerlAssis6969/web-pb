@@ -15,6 +15,7 @@ const Dashboard = ({ user, onLogout }) => {
 
     const [records, setRecords] = useState([]);
     const [checkedRecords, setCheckedRecords] = useState([]);
+    const [totalActiveCount, setTotalActiveCount] = useState(0);
     const [inputLine, setInputLine] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -53,6 +54,9 @@ const Dashboard = ({ user, onLogout }) => {
                 }
 
                 if (!append) setCheckedRecords(data.checked || []);
+
+                // Update total count
+                setTotalActiveCount(data.total || 0);
 
                 setHasMore(data.records.length === LIMIT);
                 setPage(pageNum);
@@ -100,8 +104,14 @@ const Dashboard = ({ user, onLogout }) => {
             });
 
             if (res.ok) {
+                const data = await res.json();
                 setInputLine('');
-                fetchRecords(1, false); // Refresh list
+
+                // Optimistically update UI without refresh
+                if (data.records && data.records.length > 0) {
+                    setRecords(prev => [...data.records, ...prev]);
+                    setTotalActiveCount(prev => prev + data.records.length);
+                }
             }
         } catch (error) {
             console.error('Failed to add record', error);
@@ -120,6 +130,7 @@ const Dashboard = ({ user, onLogout }) => {
                 const record = records.find(r => r.id === id);
                 if (record) {
                     setRecords(prev => prev.filter(r => r.id !== id));
+                    setTotalActiveCount(prev => Math.max(0, prev - 1));
                     // We can't easily add to checkedRecords without full data if it was just an ID, 
                     // but here we have the record.
                     // However, for simplicity and consistency with backend, we might just refresh or accept it disappears from Active.
@@ -145,6 +156,10 @@ const Dashboard = ({ user, onLogout }) => {
             if (res.ok) {
                 setRecords(prev => prev.filter(r => r.id !== id));
                 setCheckedRecords(prev => prev.filter(r => r.id !== id));
+                // If deleted from active, decrement total
+                if (records.some(r => r.id === id)) {
+                    setTotalActiveCount(prev => Math.max(0, prev - 1));
+                }
             }
         } catch (error) {
             console.error('Failed to delete record', error);
@@ -251,7 +266,7 @@ const Dashboard = ({ user, onLogout }) => {
                             onClick={() => setActiveTab('active')}
                             className={`pb-3 px-2 text-sm font-medium transition-colors flex items-center gap-2 ${activeTab === 'active' ? 'text-blue-400 border-b-2 border-blue-400' : 'text-gray-500 hover:text-gray-300'}`}
                         >
-                            <List size={16} /> Active ({filteredRecords.length})
+                            <List size={16} /> Active ({totalActiveCount})
                         </button>
                         <button
                             onClick={() => setActiveTab('checked')}
